@@ -24,7 +24,7 @@ class testplayer():
 				else:
 					player = 2
 				choises = ['rock', 'paper', 'scissors']
-				choise = choises[random.randint(0,9) % 3]
+				choise = choises[random.randint(0,3) % 3]
 				try:
 					result = urllib2.urlopen('%s/game/%i/%s' % (SERVER, player, choise)).read()
 					if result == 'game over':
