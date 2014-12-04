@@ -13,13 +13,11 @@ DATABASE = 'rps-server.db'
 def calc(id, player, r):
 	''' Calculate the winner of a game.
 
-	value1 is the choice of player1 limited to rock, paper or scissors
-	value2 is the choice of player2 limited to rock, paper or scissors
-
-	Returns a tupel of 2 strings. The first value is the game result of player1
-	and the second value is the game result of player2. Possible results are
-	won, lost and draw.
-	If the Input is wrong, the function returns error'''
+	Returns a tupel of a string and a boolean.
+	The string is the choice of the other player.
+	The boolean ist true if id won the game and false otherwise.
+	If the Input is wrong, the function  logs an error.
+	'''
 
 	value1 = r.get('%s:current' % id)
 	if str(id) == player[0]:
@@ -105,7 +103,7 @@ def game(id, choice):
 		200   OK         game played
 		404   NOT FOUND  game is over
 		====  =========  ============
-'''
+	'''
 
 	r = redis.StrictRedis(host='localhost', port=6379, db=0)
 
