@@ -1,9 +1,18 @@
  #!/bin/bash
-echo "Create Database"
-sqlite3 rps-server.db < schema.sql
-echo "Create Player $1"
-echo "INSERT INTO player (id) VALUES($1);" | sqlite3 rps-server.db
-echo "Create Player $2"
-echo "INSERT INTO player (id) VALUES($2);" | sqlite3 rps-server.db
-echo "Start Server"
-gunicorn -w 4 -b 127.0.0.4441 rps-server:app
+if [ $# -eq 2 ]
+	then
+		echo "Delete logs"
+		rm -f rps_server.log
+		echo "Initialize redis"
+		redis-cli select 0
+		redis-cli flushdb
+		redis-cli rpush player $1
+		redis-cli rpush player $2
+		redis-cli set played 0
+		redis-cli set $1:won 0
+		redis-cli set $2:won 0
+		echo "Start Server"
+		gunicorn --log-level info --log-file - -w 4 -b 127.0.0.1:4441 rps_server:app
+	else
+		echo "Wrong arguments"
+fi
