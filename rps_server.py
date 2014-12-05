@@ -64,7 +64,7 @@ def info():
 		====  =====================  =====================
 	'''
 
-	r = redis.StrictRedis(host='localhost', port=6379, db=0)
+	r = redis.StrictRedis(host=config.DATABASE, port=6379, db=0)
 
 	# Check for error
 	error = r.get('error')
@@ -105,7 +105,7 @@ def game(id, choice):
 		====  =========  ============
 	'''
 
-	r = redis.StrictRedis(host='localhost', port=6379, db=0)
+	r = redis.StrictRedis(host=config.DATABASE, port=6379, db=0)
 
 	# Check errorstatus
 	error = r.get('error')
