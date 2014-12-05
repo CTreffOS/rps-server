@@ -1,16 +1,12 @@
 rps-server
 ==========
 This is a small server application to manage a game of rock, paper, scissors.
+It is intended to run in a Docker (see https://github.com/CTreffOS/rps-docker
+for more information).
 
-Execute start.sh to start the server. But be *carefull* by running this
-application on your machine because it will flush the database 0 on your redis
-server.
-
-Also start.sh needs two arguments to identify the two players. All other
-ids will be tracked and causing the server to stop the game.
-
-The address of the server is 127.0.0.1:4441 but you can change this in the
-start.sh.
+Execute start.sh to start the server. Also start.sh needs two arguments to
+identify the two players. All other ids will be tracked and causing the server
+to stop the game.
 
 REST
 ----
@@ -22,10 +18,7 @@ Errorcodes
 - ERRORCODE 2 : More or less than 2 players
 - ERRORCODE 3 ; id : illegal choice (e.g. lizard or Spock) from id
 - ERRORCODE 4 : Error in Calculation
-
-Player
-------
-An example player is added to this server.
+- ERRORCODE 5 : Converting ids to integers failed
 
 Requirements
 ------------

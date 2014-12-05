@@ -20,7 +20,7 @@ def calc(id, player, r):
 	'''
 
 	value1 = r.get('%s:current' % id)
-	if str(id) == player[0]:
+	if id == player[0]:
 		value2 = r.get('%s:current' % player[1])
 	else:
 		value2 = r.get('%s:current' % player[0])
@@ -115,14 +115,22 @@ def game(id, choice):
 	# Get player
 	player = r.lrange('player', 0, -1)
 
-	# Check id
-	if not str(id) in player:
-		r.set('error', 'ERRORCODE 1')
-		return 'game over', 404
-
 	# Check number of players
 	if not len(player) == 2:
 		r.set('error', 'ERRORCODE 2')
+		return 'game over', 404
+
+	# Convert ids to int
+	try:
+		for i in range(len(player)):
+			player[i] = int(player)
+	except:
+		r.set('error', 'ERRORCODE 5')
+		return 'game over', 404
+
+	# Check id
+	if not id in player:
+		r.set('error', 'ERRORCODE 1')
 		return 'game over', 404
 
 	# Check number of played games
