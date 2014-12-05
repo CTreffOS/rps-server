@@ -1,14 +1,14 @@
 from flask import Flask, jsonify
 from time import sleep, time
 import redis
-
+import config
 
 # Create aplication
 app = Flask(__name__)
 
 
 MAX_GAMES = 1000
-DATABASE = 'rps-server.db'
+
 
 def calc(id, player, r):
 	''' Calculate the winner of a game.
