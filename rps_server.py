@@ -82,7 +82,9 @@ def info():
  	# Get result
 	result = {}
 	for p in player:
-		result[p] = r.get('%s:won' % p)
+		result[p] = {'won' : r.get('%s:won' % p),  'rock' : r.get('%s:rock' % p),
+				'paper' : r.get('%s:paper' % p), 'scissors' : r.get('%s:scissors' %
+					p)}
 	return jsonify(result), 200
 
 
@@ -149,6 +151,9 @@ def game(id, choice):
 
 	# Set current
 	r.set('%s:current' % id, choice)
+
+	# Set statistic
+	r.incr('%s:%s' % (id, choice))
 
 	# Sleep until all player has chosen
 	while not (r.exists('%s:current' % player[0]) and r.exists('%s:current' % player[1])):
