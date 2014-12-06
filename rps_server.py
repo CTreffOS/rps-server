@@ -123,7 +123,7 @@ def game(id, choice):
 	# Convert ids to int
 	try:
 		for i in range(len(player)):
-			player[i] = int(player)
+			player[i] = int(player[i])
 	except:
 		r.set('error', 'ERRORCODE 5')
 		return 'game over', 404
