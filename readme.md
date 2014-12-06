@@ -5,8 +5,11 @@ It is intended to run in a Docker (see https://github.com/CTreffOS/rps-docker
 for more information).
 
 Execute start.sh to start the server. Also start.sh needs two arguments to
-identify the two players. All other ids will be tracked and causing the server
-to stop the game.
+identify the two players.
+
+There is a testplayer and a testscript to simulate a game. Run sh test.sh.
+Therefore curl and a redis server and client are needed. Redis will use
+database 0 to save variables.
 
 REST
 ----
@@ -24,7 +27,7 @@ Requirements
 ------------
 
  - python
- - python redis
- - redis
- - gunicorn
+ - redis-tools
+ - python-redis
  - python flask
+ - gunicorn
