@@ -5,6 +5,8 @@
 	redis-cli select 0
 	redis-cli del error
 	redis-cli del player
+	redis-cli del $1:current
+	redis-cli del $2:current
 	redis-cli rpush player $1
 	redis-cli rpush player $2
 	redis-cli set played 0
