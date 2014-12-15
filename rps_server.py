@@ -1,6 +1,5 @@
 from flask import Flask, jsonify
 import redis
-import server_config
 
 # Create aplication
 app = Flask(__name__)
@@ -29,7 +28,7 @@ def info():
 		====  =====================  =====================
 	'''
 
-	r = redis.StrictRedis(host=server_config.DATABASE, port=6379, db=0)
+	r = redis.StrictRedis(host='localhost', db=0)
 
 	# Check for error
 	error = r.get('error')
@@ -76,7 +75,7 @@ def game(id, choice):
 		====  =========  ============
 	'''
 
-	r = redis.StrictRedis(host=server_config.DATABASE, port=6379, db=0)
+	r = redis.StrictRedis(host='localhost', db=0)
 
 	# Check errorstatus
 	if r.exists('error'):
