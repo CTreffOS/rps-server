@@ -24,7 +24,7 @@ if [ $# -eq 2 ];
 				redis-cli -h $DB_PORT_6379_TCP_ADDR set $2:scissors 0
 				echo "DATABASE = \"$DB_PORT_6379_TCP_ADDR\"" > server_config.py
 				echo "Start Server"
-				gunicorn --log-level info --log-file - -w 3 -b 127.0.0.1:4441 rps_server:app
+				gunicorn --log-level debug --log-file - -w 3 -b 0.0.0.0:4441 rps_server:app
 		fi
 	else
 		echo "Wrong arguments"
