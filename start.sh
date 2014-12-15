@@ -1,4 +1,4 @@
- #!/bin/bash
+#!/bin/bash
 if [ $# -eq 2 ];
 then
 	/usr/bin/redis-server &
