@@ -2,7 +2,8 @@
 if [ $# -eq 2 ];
 then
 	/usr/bin/redis-server &
-	cd $(dirname $0)
+	# Make sure redis is ready to go
+	sleep 1
 	echo "Initialize redis"
 	redis-cli rpush player $1
 	redis-cli rpush player $2
@@ -16,6 +17,7 @@ then
 	redis-cli set $2:paper 0
 	redis-cli set $2:scissors 0
 	echo "Start Server"
+	cd $(dirname $0)
 	gunicorn --log-level debug --log-file - -w 32 -b 0.0.0.0:4441 rps_server:app
 else
 	echo "Wrong arguments"
