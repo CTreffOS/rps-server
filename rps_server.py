@@ -1,5 +1,4 @@
 from flask import Flask, jsonify
-from time import sleep, time
 import redis
 import server_config
 
@@ -8,49 +7,15 @@ app = Flask(__name__)
 
 
 MAX_GAMES = 1000
-
-
-def calc(id, player, r):
-	''' Calculate the winner of a game.
-
-	Returns a tupel of a string and a boolean.
-	The string is the choice of the other player.
-	The boolean ist true if id won the game and false otherwise.
-	If the Input is wrong, the function  logs an error.
-	'''
-
-	value1 = r.get('%s:current' % id)
-	if id == player[0]:
-		value2 = r.get('%s:current' % player[1])
-	else:
-		value2 = r.get('%s:current' % player[0])
-
-	if value1 == value2:
-		return (value2, False)
-	elif value1 == 'rock':
-		if value2 == 'paper':
-			return (value2, False)
-		if value2 == 'scissors':
-			return (value2, True)
-	elif value1 == 'paper':
-		if value2 == 'scissors':
-			return (value2, False)
-		if value2 == 'rock':
-			return (value2, True)
-	elif value1 == 'scissors':
-		if value2 == 'rock':
-			return (value2, False)
-		if value2 == 'paper':
-			return (value2, True)
-	r.set('error', 'ERRORCODE 4')
-	return ('', False)
+POSSIBILITIES = ['rock', 'paper', 'scissors']
+RELATIONS = [[False, False, True],[True, False, False],[False, True, False]]
 
 
 @app.route('/')
 def info():
 	'''Manage the output of this server.
 	If an error occurs this function return this error
-	While the game is not over this function return playing
+	While the game is not over this function returns "playing"
 	Otherwise this function returns the result the won games by each player in
 	json. For example if the player 123 won 12 games and the player 321 won 11
 	games the output is the dictionary {123 : 12, 321 : 11}.
@@ -71,8 +36,12 @@ def info():
 	if error:
 		return error, 200
 
-	# Check for number of played games
-	played = int(r.get('played'))
+	# Check number of played games
+	try:
+		played = int(r.get('played'))
+	except:
+		r.set('error', 'ERRORCODE 5')
+		return 'ERRORCODE 5', 200
 	if not played == 2* MAX_GAMES:
 		return 'playing', 200
 
@@ -82,9 +51,9 @@ def info():
  	# Get result
 	result = {}
 	for p in player:
-		result[p] = {'won' : r.get('%s:won' % p),  'rock' : r.get('%s:rock' % p),
-				'paper' : r.get('%s:paper' % p), 'scissors' : r.get('%s:scissors' %
-					p)}
+		result[p] = {'won' : r.get('%s:won' % p)}
+		for v in POSSIBILITIES:
+			result[p][v] = r.get('%s:%s' % (p,v))
 	return jsonify(result), 200
 
 
@@ -110,8 +79,17 @@ def game(id, choice):
 	r = redis.StrictRedis(host=server_config.DATABASE, port=6379, db=0)
 
 	# Check errorstatus
-	error = r.get('error')
-	if error:
+	if r.exists('error'):
+		return 'game over', 404
+
+	# Check number of played games
+	try:
+		played = int(r.get('played'))
+	except:
+		r.set('error', 'ERRORCODE 5')
+		return 'game over', 404
+
+	if played == 2*MAX_GAMES:
 		return 'game over', 404
 
 	# Get player
@@ -124,61 +102,69 @@ def game(id, choice):
 
 	# Convert ids to int
 	try:
-		for i in range(len(player)):
-			player[i] = int(player[i])
+		player[0] = int(player[0])
+		player[1] = int(player[1])
 	except:
 		r.set('error', 'ERRORCODE 5')
 		return 'game over', 404
 
-	# Check id
-	if not id in player:
+	# Check ids
+	if id == player[0]:
+		opponent = player[1]
+	elif id == player[1]:
+		opponent = player[0]
+	else:
 		r.set('error', 'ERRORCODE 1')
 		return 'game over', 404
 
-	# Check number of played games
-	played = int(r.get('played'))
-	if played == 2*MAX_GAMES:
-		return 'game over', 404
-
-	# Check choice
-	if not choice in ['rock', 'paper', 'scissors']:
+	# Set choice
+	try:
+		choice = POSSIBILITIES.index(choice)
+	except:
 		r.set('error', 'ERRORCODE 3 ; ID %s', id)
 		return 'game over', 404
 
 	# Check current
-	if r.get('%s:current' % id):
+	if r.exists('%s:current' % id):
 		return 'current already set', 200
 
 	# Set current
 	r.set('%s:current' % id, choice)
 
-	# Set statistic
-	r.incr('%s:%s' % (id, choice))
+	# Sleep until all player has chosen or an error occured
+	while not (r.exists('%s:current' % opponent) or r.exists('error')):
+		pass
 
-	# Sleep until all player has chosen
-	while not (r.exists('%s:current' % player[0]) and r.exists('%s:current' % player[1])):
-		sleep(0.00000001)
+	# Get current of the opponent
+	try:
+		opp_choice = int(r.get('%s:current' % opponent))
+	except:
+		r.set('error', 'ERRORCODE 5')
+		return 'game over', 404
 
 	# Calculate result
-	(ret, won) = calc(id, player, r)
+	won = RELATIONS[choice][opp_choice]
 
 	# If won
 	if won:
 		r.incr('%s:won' % id)
+
+	# Set statistic
+	r.incr('%s:%s' % (id, POSSIBILITIES[choice]))
 
 	# Increase number of played games (This is done twice.)
 	r.incr('played')
 
 	# Wait until both players are ready with calculation
 	while not (played == int(r.get('played')) - 2):
-		sleep(0.00000001)
+		pass
 
 	# Delete own current
 	r.delete('%s:current' % id)
 
 	# Return choice of the other player
-	return ret, 200
+	return POSSIBILITIES[opp_choice], 200
 
 
 if __name__ == '__main__':
-	app.run(host='0.0.0.0', port=4441, threaded=True)
+	app.run(host='0.0.0.0', port=4441, debug=True, threaded=True)

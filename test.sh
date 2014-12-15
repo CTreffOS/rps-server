@@ -20,12 +20,12 @@
 	redis-cli set $2:scissors 0
 	echo "DATABASE = \"127.0.0.1\"" > server_config.py
 	echo "start server"
-	timeout 10 gunicorn --log-level info --log-file 'server.log' -w 3 -b 127.0.0.1:4441 rps_server:app &
+	timeout 10 gunicorn --log-level debug --log-file 'server.log' -w 3 -b 127.0.0.1:4441 rps_server:app &
 	sleep 2
 	echo "start player"
 	echo "time"
-	time -f "\t%E real" python testplayer.py $1 &
-	time -f "\t%E real" python testplayer.py $2
+	time -f "\t%E" python testplayer.py $1 &
+	time -f "\t%E" python testplayer.py $2
 	echo "played: $(redis-cli get played)"
 	echo "error: $(redis-cli get error)"
 	echo "Player $1:"
