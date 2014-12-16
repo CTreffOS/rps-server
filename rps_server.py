@@ -141,7 +141,7 @@ def game(id, choice):
 		opp_choice = int(r.get('%s:current' % opponent))
 	except:
 		r.set('error', 'Error in Redis database: Could not get %s:current' \
-				%s opponent)
+				% opponent)
 		return 'game over', 404
 
 	# Calculate result
