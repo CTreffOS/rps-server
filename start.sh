@@ -3,7 +3,9 @@ if [ $# -eq 2 ];
 then
 	/usr/bin/redis-server &
 	# Make sure redis is ready to go
-	sleep 1
+	while [ $(redis-cli ping) != "PONG" ]
+		do sleep 0.01
+	done
 	echo "Initialize redis"
 	redis-cli rpush player $1
 	redis-cli rpush player $2
