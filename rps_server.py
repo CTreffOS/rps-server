@@ -39,8 +39,8 @@ def info():
 	try:
 		played = int(r.get('played'))
 	except:
-		r.set('error', 'ERRORCODE 5')
-		return 'ERRORCODE 5', 200
+		r.set('error', 'Error in Redis database: Could not get played games')
+		return 'Error in Redis database: Could not get played games', 200
 	if not played == 2* MAX_GAMES:
 		return 'playing', 200
 
@@ -58,7 +58,8 @@ def info():
 
 @app.route('/<int:id>/<choice>')
 def game(id, choice):
-	'''Function to call for a game. This function waits until both player has chosen.
+	'''Function to call for a game. This function waits until both player has
+	chosen.
 
 	player is the integer of the player, so possible values are 1 and 2
 	choice is the choice of the player limited to rock, paper and scissors
@@ -85,7 +86,7 @@ def game(id, choice):
 	try:
 		played = int(r.get('played'))
 	except:
-		r.set('error', 'ERRORCODE 5')
+		r.set('error', 'Error in Redis database: Could not get played games')
 		return 'game over', 404
 
 	if played == 2*MAX_GAMES:
@@ -96,7 +97,7 @@ def game(id, choice):
 
 	# Check number of players
 	if not len(player) == 2:
-		r.set('error', 'ERRORCODE 2')
+		r.set('error', 'Error in Redis database: More or less than two player')
 		return 'game over', 404
 
 	# Convert ids to int
@@ -104,7 +105,8 @@ def game(id, choice):
 		player[0] = int(player[0])
 		player[1] = int(player[1])
 	except:
-		r.set('error', 'ERRORCODE 5')
+		r.set('error', 'Error in Redis database: One or two player ids are no '
+				'integer')
 		return 'game over', 404
 
 	# Check ids
@@ -113,14 +115,14 @@ def game(id, choice):
 	elif id == player[1]:
 		opponent = player[0]
 	else:
-		r.set('error', 'ERRORCODE 1')
+		r.set('error', 'Error in player input: Wrong id was used')
 		return 'game over', 404
 
 	# Set choice
 	try:
 		choice = POSSIBILITIES.index(choice)
 	except:
-		r.set('error', 'ERRORCODE 3 ; ID %s', id)
+		r.set('error', 'Error in player %s input: Choice not legal', id)
 		return 'game over', 404
 
 	# Check current
@@ -138,7 +140,8 @@ def game(id, choice):
 	try:
 		opp_choice = int(r.get('%s:current' % opponent))
 	except:
-		r.set('error', 'ERRORCODE 5')
+		r.set('error', 'Error in Redis database: Could not get %s:current' \
+				%s opponent)
 		return 'game over', 404
 
 	# Calculate result

@@ -15,14 +15,6 @@ REST
 ----
 For REST look at the source code in rps_server.py
 
-Errorcodes
-----------
-- ERRORCODE 1 : Wrong id used
-- ERRORCODE 2 : More or less than 2 players
-- ERRORCODE 3 ; id : illegal choice (e.g. lizard or Spock) from id
-- ERRORCODE 4 : Error in Calculation
-- ERRORCODE 5 : Converting ids to integers failed
-
 Requirements
 ------------
 
