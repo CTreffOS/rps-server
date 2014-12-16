@@ -18,7 +18,6 @@
 	redis-cli set $2:rock 0
 	redis-cli set $2:paper 0
 	redis-cli set $2:scissors 0
-	echo "DATABASE = \"127.0.0.1\"" > server_config.py
 	echo "start server"
 	timeout 10 gunicorn --log-level debug --log-file 'server.log' -w 3 -b 127.0.0.1:4441 rps_server:app &
 	sleep 2
