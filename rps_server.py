@@ -138,7 +138,17 @@ def game(id, choice):
 
 	# Get current of the opponent
 	try:
-		opp_choice = int(r.get('%s:current' % opponent))
+		opp_choice = 0
+		tries = 0
+		while not opp_choice:
+			try:
+				opp_choice = int(r.get('%s:current' % opponent))
+			except Exception as e:
+				print('WARN: Redis: Could not get %s:current' % opponent)
+				time.sleep(0.01)
+				tries += 1
+				if tries > 3:
+					raise e
 	except:
 		r.set('error', 'Error in Redis database: Could not get %s:current' \
 				% opponent)
