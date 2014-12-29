@@ -20,7 +20,7 @@ then
 	redis-cli set $2:scissors 0
 	echo "Start Server"
 	cd $(dirname $0)
-	gunicorn --log-level debug --log-file - -w 2 -b 0.0.0.0:4441 rps_server:app
+	gunicorn --log-level debug --log-file - -w 3 -b 0.0.0.0:4441 rps_server:app
 else
 	echo "Wrong arguments"
 fi
