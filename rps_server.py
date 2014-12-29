@@ -1,5 +1,6 @@
 from flask import Flask, jsonify
 import redis
+import time
 
 # Create aplication
 app = Flask(__name__)
@@ -134,7 +135,11 @@ def game(id, choice):
 
 	# Sleep until all player has chosen or an error occured
 	while not (r.exists('%s:current' % opponent) or r.exists('error')):
-		pass
+		time.sleep(0.01)
+
+	# Check errorstatus (again)
+	if r.exists('error'):
+		return 'game over', 404
 
 	# Get current of the opponent
 	try:
