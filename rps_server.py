@@ -164,7 +164,7 @@ def game(id, choice):
 
 	# Wait until both players are ready with calculation
 	while not (played == int(r.get('played')) - 2):
-		pass
+		time.sleep(0.01)
 
 	# Delete own current
 	r.delete('%s:current' % id)
