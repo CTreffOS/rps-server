@@ -9,7 +9,8 @@ then
 	echo "Initialize redis"
 	redis-cli rpush player $1
 	redis-cli rpush player $2
-	redis-cli set played 0
+	redis-cli set $1:played 0
+	redis-cli set $2:played 0
 	redis-cli set $1:won 0
 	redis-cli set $2:won 0
 	redis-cli set $1:rock 0
