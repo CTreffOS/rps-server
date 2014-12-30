@@ -135,7 +135,8 @@ def game(id, choice):
 
 	# Sleep until all player has chosen or an error occured
 	while not (r.exists('%s:current' % opponent) or r.exists('error')):
-		time.sleep(0.01)
+		#time.sleep(0.01)
+		pass
 
 	# Check errorstatus (again)
 	if r.exists('error'):
