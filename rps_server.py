@@ -37,13 +37,15 @@ def info():
 		return error, 200
 
 	# Check number of played games
-	try:
-		played = int(r.get('played'))
-	except:
-		r.set('error', 'Error in Redis database: Could not get played games')
-		return 'Error in Redis database: Could not get played games', 200
-	if not played == 2* MAX_GAMES:
-		return 'playing', 200
+	#try:
+	#	played_id = int(r.get('%s:played' % id))
+	#	played_op = int(r.get('%s:played' % opponent))
+	#except:
+#		r.set('error', 'Error in Redis database: Could not get played games')
+#		return 'Error in Redis database: Could not get played games', 200
+
+#	if not played_id == MAX_GAMES and played_op == MAX_GAMES:
+#		return 'playing', 200
 
 	# Get player
 	player = r.lrange('player', 0, -1)
@@ -83,16 +85,6 @@ def game(id, choice):
 	if r.exists('error'):
 		return 'game over', 404
 
-	# Check number of played games
-	try:
-		played = int(r.get('played'))
-	except:
-		r.set('error', 'Error in Redis database: Could not get played games')
-		return 'game over', 404
-
-	if played == 2*MAX_GAMES:
-		return 'game over', 404
-
 	# Get player
 	player = r.lrange('player', 0, -1)
 
@@ -130,11 +122,32 @@ def game(id, choice):
 	if r.exists('%s:current' % id):
 		return 'current already set', 200
 
+	# Check number of played games
+	try:
+		played_id = int(r.get('%s:played' % id))
+		played_op = int(r.get('%s:played' % opponent))
+	except:
+		r.set('error', 'Error in Redis database: Could not get played games')
+		return 'game over', 404
+
+	if played_id == MAX_GAMES:
+		return 'game over', 404
+
 	# Set current
-	r.set('%s:current' % id, choice)
+	print(r.set('%s:current' % id, choice))
+
+	# Wait for other player
+	while not (played_id == played_op):
+		time.sleep(0.01)
+		try:
+			played_id = int(r.get('%s:played' % id))
+			played_op = int(r.get('%s:played' % opponent))
+		except:
+			r.set('error', 'Error in Redis database: Could not get played games')
+			return 'game over', 404
 
 	# Sleep until all player has chosen or an error occured
-	while not (r.exists('%s:current' % opponent) or r.exists('error')):
+	while not (r.exists('%s:current' % opponent)):
 		time.sleep(0.01)
 
 	# Check errorstatus (again)
@@ -159,11 +172,11 @@ def game(id, choice):
 	# Set statistic
 	r.incr('%s:%s' % (id, POSSIBILITIES[choice]))
 
-	# Increase number of played games (This is done twice.)
-	r.incr('played')
+	# Increase number of played games
+	r.incr('%s:played' % id)
 
 	# Wait until both players are ready with calculation
-	while not (played == int(r.get('played')) - 2):
+	while not int(r.get('%s:played' % id)) == int(r.get('%s:played' % opponent)):
 		time.sleep(0.01)
 
 	# Delete own current
